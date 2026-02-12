@@ -17,35 +17,37 @@ Status legend:
 
 ## 1) App Entry Point and Scene Flow (Highest Priority)
 
-- [ ] Create `AppBootstrap` in `Loader` scene
-  - Acceptance: pressing Play in `Loader` creates or reuses one persistent `App`.
-- [ ] Create persistent `App.cs` (`DontDestroyOnLoad`)
-  - Acceptance: only one `App` instance exists across scene transitions.
-- [ ] Create `SceneFlowManager`
-  - Acceptance: supports `LoadMain()` and `LoadGame()`.
-- [ ] Wire loop `Loader -> Main -> Game -> Main`
-  - Acceptance: user can start in Main, enter Game, return to Main repeatedly without duplicate managers.
+- [x] Create `AppBootstrap` (runtime bootstrap path implemented)
+  - Acceptance: app auto-creates persistent `App` before first scene load.
+- [x] Create persistent `App.cs` (`DontDestroyOnLoad`)
+  - Acceptance: singleton app persists across transitions.
+- [x] Create `SceneFlowManager`
+  - Acceptance: supports `LoadMain()`, `LoadGame()`, `ReloadGame()`.
+- [~] Wire loop `Loader -> Main -> Game -> Main`
+  - Implemented via `App` scene handling.
+  - Missing: final UI button wiring in Main/Pause/Complete popups.
 
 ## 2) Game Session Management
 
-- [ ] Add `GameSessionManager` with explicit states
+- [x] Add `GameSessionManager` with explicit states
   - States: `Idle`, `Running`, `Paused`, `Completed`.
-- [ ] Session API
+- [x] Session API
   - `StartSession(levelId)`
   - `PauseSession()`
   - `ResumeSession()`
   - `CompleteSession()`
   - `AbortToMain()`
-- [ ] Connect gameplay to session lifecycle
+- [x] Connect gameplay to session lifecycle
+  - `GameManager.SetPaused(...)` now disables item input + camera controls.
   - Acceptance: gameplay input disabled while paused/completed.
 
 ## 3) Coin System (Elapsed Time Based)
 
-- [ ] Add `CoinManager`
+- [x] Add `CoinManager`
   - Tracks total coins and session coins.
-- [ ] Add reward configuration (interval + reward amount)
+- [x] Add reward configuration (interval + reward amount)
   - Example: +1 coin every N seconds while session is running.
-- [ ] Pause-safe timing
+- [x] Pause-safe timing
   - Acceptance: no coins awarded while paused.
 - [ ] UI binding for coin display
   - Acceptance: coin count updates in Game and persists when returning to Main.
@@ -64,10 +66,11 @@ Status legend:
 
 ## 5) Game Completion Rules
 
-- [ ] Define completion trigger
-  - Recommended: complete when `RemainingItems` list reaches zero.
-- [ ] Trigger `CompleteSession()` and level-complete popup
-  - Acceptance: collection input stops after completion until replay/new session.
+- [x] Define completion trigger
+  - Implemented: `RemainingItems` emits `OnAllItemsCollected` when list reaches zero.
+- [~] Trigger `CompleteSession()` and level-complete popup
+  - Session completion is wired (`GameManager` -> `App` -> `GameSessionManager`).
+  - Missing: level-complete popup UI presentation.
 
 ## 6) Scene Wiring and Installers
 

@@ -11,10 +11,14 @@ public class RemainingItems : MonoBehaviour
 
     private readonly List<RemainingItem> itemViews = new List<RemainingItem>();
     private readonly Dictionary<string, RemainingEntry> entriesById = new Dictionary<string, RemainingEntry>(StringComparer.Ordinal);
+    private bool allItemsCollectedRaised;
+
+    public event Action OnAllItemsCollected;
 
     public void BuildFromSpawnedItems(IReadOnlyList<HiddenItem> spawnedItems)
     {
         ClearAll();
+        allItemsCollectedRaised = false;
 
         if (itemPrefab == null)
         {
@@ -85,6 +89,11 @@ public class RemainingItems : MonoBehaviour
                 Count = entryData.Count,
                 View = itemView
             };
+        }
+
+        if (entriesById.Count == 0)
+        {
+            RaiseAllItemsCollected();
         }
     }
 
@@ -157,6 +166,7 @@ public class RemainingItems : MonoBehaviour
 
         itemViews.Clear();
         entriesById.Clear();
+        allItemsCollectedRaised = false;
     }
 
     private void RemoveEntry(string itemId, RemainingItem itemView)
@@ -177,6 +187,22 @@ public class RemainingItems : MonoBehaviour
         {
             DestroyImmediate(itemView.gameObject);
         }
+
+        if (entriesById.Count == 0)
+        {
+            RaiseAllItemsCollected();
+        }
+    }
+
+    private void RaiseAllItemsCollected()
+    {
+        if (allItemsCollectedRaised)
+        {
+            return;
+        }
+
+        allItemsCollectedRaised = true;
+        OnAllItemsCollected?.Invoke();
     }
 
     private struct RemainingEntry
