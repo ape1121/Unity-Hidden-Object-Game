@@ -368,6 +368,7 @@ MonoBehaviour:
   maxZoom: 10
   boundsMin: {x: -1, y: -5}
   boundsMax: {x: 1, y: 10}
+  ignoreInputOverUi: 1
 --- !u!114 &519420034
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -975,8 +976,11 @@ MonoBehaviour:
   hiddenItemSpawner: {fileID: 1360924120}
   hiddenItemCollector: {fileID: 519420034}
   remainingItems: {fileID: 1343725524}
-  uiManager: {fileID: 1501294054}
+  gameUI: {fileID: 1501294056}
+  hiddenItemInput: {fileID: 519420035}
+  cameraRigController: {fileID: 519420033}
   initializeOnStart: 1
+  pauseWithTimeScale: 0
 --- !u!4 &1495803076
 Transform:
   m_ObjectHideFlags: 0
@@ -1004,8 +1008,9 @@ GameObject:
   - component: {fileID: 1501294052}
   - component: {fileID: 1501294051}
   - component: {fileID: 1501294050}
-  - component: {fileID: 1501294054}
   - component: {fileID: 1501294055}
+  - component: {fileID: 1501294056}
+  - component: {fileID: 1501294057}
   m_Layer: 5
   m_Name: UICanvas
   m_TagString: Untagged
@@ -1097,23 +1102,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &1501294054
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1501294049}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 403eb822858ec49ad8125b5e01eb9906, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  hiddenItemSpawner: {fileID: 1360924120}
-  hiddenItemCollector: {fileID: 519420034}
-  remainingItems: {fileID: 1343725524}
-  collectionAnimator: {fileID: 1501294055}
-  targetHitLeadTime: 0.025
 --- !u!114 &1501294055
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1146,6 +1134,41 @@ MonoBehaviour:
   curveHeightDistanceFactor: 0.15
   fallbackFlySize: {x: 150, y: 150}
   minimumFlySize: {x: 130, y: 130}
+--- !u!114 &1501294056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1501294049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b4a3dbbbc3d64b07850ae1c75d3f552, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameUI
+  canvasGroup: {fileID: 1501294057}
+  enterDuration: 0.2
+  exitDuration: 0.16
+  enterEase: 9
+  exitEase: 8
+  hideOnExit: 0
+  hiddenItemSpawner: {fileID: 1360924120}
+  hiddenItemCollector: {fileID: 519420034}
+  remainingItems: {fileID: 1343725524}
+  collectionAnimator: {fileID: 1501294055}
+  targetHitLeadTime: 0.025
+--- !u!225 &1501294057
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1501294049}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1578663228
 GameObject:
   m_ObjectHideFlags: 0

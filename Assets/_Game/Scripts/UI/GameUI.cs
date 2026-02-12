@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class GameUI : CanvasGroupUserInterface
 {
     [Header("Dependencies")]
     [SerializeField] private HiddenItemSpawner hiddenItemSpawner;
@@ -65,8 +65,9 @@ public class UIManager : MonoBehaviour
         processingCollectedQueue = false;
     }
 
-    private void OnDisable()
+    protected override void OnDisable()
     {
+        base.OnDisable();
         Shutdown();
     }
 

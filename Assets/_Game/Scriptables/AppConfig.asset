@@ -16,8 +16,8 @@ MonoBehaviour:
   mainSceneName: Main
   gameSceneName: Game
   defaultLevelId: level_01
-  autoAdvanceFromLoader: 1
   coinRewardIntervalSeconds: 5
   coinRewardPerInterval: 1
-  enableKeyboardDebugShortcuts: 1
-  verboseLogging: 1
+  popupCanvasPrefab: {fileID: 6410438596636778884, guid: 4546ffee74996458cbc866038f07b43a, type: 3}
+  popupPrefabs:
+  - {fileID: 7137359552040780050, guid: bee94fea19d9a4501a87cf6f1cbf8ee7, type: 3}

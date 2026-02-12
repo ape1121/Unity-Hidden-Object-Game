@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,15 +9,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private HiddenItemSpawner hiddenItemSpawner;
     [SerializeField] private HiddenItemCollector hiddenItemCollector;
     [SerializeField] private RemainingItems remainingItems;
-    [SerializeField] private UIManager uiManager;
+    [FormerlySerializedAs("uiManager")]
+    [SerializeField] private GameUI gameUI;
     [SerializeField] private HiddenItemInput hiddenItemInput;
     [SerializeField] private CameraRigController cameraRigController;
 
     [Header("Startup")]
     [SerializeField] private bool initializeOnStart = true;
-    [SerializeField] private bool pauseWithTimeScale = true;
 
     private bool initialized;
+    private bool sessionBound;
     private bool paused;
     private bool levelCompletedRaised;
 
@@ -39,10 +41,10 @@ public class GameManager : MonoBehaviour
 
         ResolveOptionalReferences();
 
-        if (uiManager != null)
+        if (gameUI != null)
         {
-            uiManager.Configure(hiddenItemSpawner, hiddenItemCollector, remainingItems);
-            uiManager.Initialize();
+            gameUI.Configure(hiddenItemSpawner, hiddenItemCollector, remainingItems);
+            gameUI.Initialize();
         }
 
         if (levelRuntimeMap != null)
@@ -54,6 +56,9 @@ public class GameManager : MonoBehaviour
         {
             remainingItems.OnAllItemsCollected += HandleAllItemsCollected;
         }
+
+        BindSessionState();
+        StartSession();
 
         levelCompletedRaised = false;
         SetPaused(false);
@@ -67,15 +72,17 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (uiManager != null)
+        if (gameUI != null)
         {
-            uiManager.Shutdown();
+            gameUI.Shutdown();
         }
 
         if (remainingItems != null)
         {
             remainingItems.OnAllItemsCollected -= HandleAllItemsCollected;
         }
+
+        UnbindSessionState();
 
         initialized = false;
     }
@@ -99,10 +106,49 @@ public class GameManager : MonoBehaviour
         {
             cameraRigController.enabled = !paused;
         }
+    }
 
-        if (pauseWithTimeScale && Application.isPlaying)
+    public void PauseGame()
+    {
+        if (App.Sessions == null)
         {
-            Time.timeScale = paused ? 0f : 1f;
+            return;
+        }
+
+        App.Sessions.PauseSession();
+    }
+
+    public void ResumeGame()
+    {
+        if (App.Sessions == null)
+        {
+            return;
+        }
+
+        App.Sessions.ResumeSession();
+    }
+
+    public void CompleteLevel()
+    {
+        if (App.Sessions == null)
+        {
+            return;
+        }
+
+        App.Sessions.CompleteSession();
+    }
+
+    public void ReturnToMain()
+    {
+        if (App.Sessions != null)
+        {
+            App.Sessions.AbortToMain();
+            App.Sessions.ResetToIdle();
+        }
+
+        if (App.Scenes != null)
+        {
+            App.Scenes.LoadMain();
         }
     }
 
@@ -115,6 +161,79 @@ public class GameManager : MonoBehaviour
 
         levelCompletedRaised = true;
         LevelCompleted?.Invoke();
+        CompleteLevel();
+    }
+
+    private void StartSession()
+    {
+        if (App.Sessions == null || App.Config == null)
+        {
+            return;
+        }
+
+        App.Sessions.StartSession(App.Config.DefaultLevelId);
+        ApplySessionState(App.Sessions.State);
+    }
+
+    private void BindSessionState()
+    {
+        if (sessionBound || App.Sessions == null)
+        {
+            return;
+        }
+
+        App.Sessions.OnStateChanged += HandleSessionStateChanged;
+        sessionBound = true;
+    }
+
+    private void UnbindSessionState()
+    {
+        if (!sessionBound)
+        {
+            return;
+        }
+
+        if (App.Sessions != null)
+        {
+            App.Sessions.OnStateChanged -= HandleSessionStateChanged;
+        }
+
+        sessionBound = false;
+    }
+
+    private void HandleSessionStateChanged(GameSessionState previousState, GameSessionState newState)
+    {
+        ApplySessionState(newState);
+    }
+
+    private void ApplySessionState(GameSessionState state)
+    {
+        bool shouldPause = state == GameSessionState.Paused || state == GameSessionState.Completed;
+        SetPaused(shouldPause);
+
+        if (App.Popups == null)
+        {
+            return;
+        }
+
+        switch (state)
+        {
+            case GameSessionState.Paused:
+                App.Popups.Open(PopupType.Pause);
+                App.Popups.Close(PopupType.Win);
+                break;
+            case GameSessionState.Completed:
+                App.Popups.Close(PopupType.Pause);
+                App.Popups.Open(PopupType.Win);
+                break;
+            case GameSessionState.Running:
+                App.Popups.Close(PopupType.Pause);
+                App.Popups.Close(PopupType.Win);
+                break;
+            default:
+                App.Popups.CloseAll();
+                break;
+        }
     }
 
     private void ResolveOptionalReferences()
@@ -132,6 +251,12 @@ public class GameManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (App.Sessions != null && App.Sessions.State != GameSessionState.Idle)
+        {
+            App.Sessions.AbortToMain();
+            App.Sessions.ResetToIdle();
+        }
+
         SetPaused(false);
         ShutdownGame();
     }

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AppConfig", menuName = "SearchIt/App Config", order = 1)]
@@ -10,19 +12,23 @@ public class AppConfig : ScriptableObject
 
     [Header("Startup")]
     [SerializeField] private string defaultLevelId = "level_01";
-    [SerializeField] private bool autoAdvanceFromLoader = true;
 
     [Header("Economy")]
     [SerializeField, Min(0.1f)] private float coinRewardIntervalSeconds = 5f;
     [SerializeField, Min(1)] private int coinRewardPerInterval = 1;
 
+    [Header("Popups")]
+    [SerializeField] private Canvas popupCanvasPrefab;
+    [SerializeField] private PopupView[] popupPrefabs = Array.Empty<PopupView>();
+
     public string LoaderSceneName => loaderSceneName;
     public string MainSceneName => mainSceneName;
     public string GameSceneName => gameSceneName;
     public string DefaultLevelId => defaultLevelId;
-    public bool AutoAdvanceFromLoader => autoAdvanceFromLoader;
     public float CoinRewardIntervalSeconds => coinRewardIntervalSeconds;
     public int CoinRewardPerInterval => coinRewardPerInterval;
+    public Canvas PopupCanvasPrefab => popupCanvasPrefab;
+    public IReadOnlyList<PopupView> PopupPrefabs => popupPrefabs;
 
 #if UNITY_EDITOR
     private void OnValidate()
@@ -49,6 +55,7 @@ public class AppConfig : ScriptableObject
 
         coinRewardIntervalSeconds = Mathf.Max(0.1f, coinRewardIntervalSeconds);
         coinRewardPerInterval = Mathf.Max(1, coinRewardPerInterval);
+        popupPrefabs ??= Array.Empty<PopupView>();
     }
 #endif
 }

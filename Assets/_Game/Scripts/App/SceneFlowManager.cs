@@ -7,15 +7,23 @@ public sealed class SceneFlowManager
     private readonly string mainSceneName;
     private readonly string gameSceneName;
 
+    public event Action<Scene, LoadSceneMode> OnSceneLoaded;
+
     public string LoaderSceneName => loaderSceneName;
     public string MainSceneName => mainSceneName;
     public string GameSceneName => gameSceneName;
 
     public SceneFlowManager(string loaderSceneName, string mainSceneName, string gameSceneName)
     {
-        this.loaderSceneName = string.IsNullOrWhiteSpace(loaderSceneName) ? "Loader" : loaderSceneName;
-        this.mainSceneName = string.IsNullOrWhiteSpace(mainSceneName) ? "Main" : mainSceneName;
-        this.gameSceneName = string.IsNullOrWhiteSpace(gameSceneName) ? "Game" : gameSceneName;
+        this.loaderSceneName = loaderSceneName;
+        this.mainSceneName = mainSceneName;
+        this.gameSceneName = gameSceneName;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+    }
+
+    public void Shutdown()
+    {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
     }
 
     public void LoadLoader()
@@ -73,5 +81,15 @@ public sealed class SceneFlowManager
             default:
                 return mainSceneName;
         }
+    }
+
+    private void HandleSceneLoaded(Scene loadedScene, LoadSceneMode loadMode)
+    {
+        if (IsSceneName(loadedScene.name, AppScene.Main) && App.Popups != null)
+        {
+            App.Popups.CloseAll(true);
+        }
+
+        OnSceneLoaded?.Invoke(loadedScene, loadMode);
     }
 }
