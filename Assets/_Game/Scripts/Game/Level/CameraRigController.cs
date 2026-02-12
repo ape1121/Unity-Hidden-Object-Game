@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class CameraRigController : MonoBehaviour
@@ -9,9 +10,11 @@ public class CameraRigController : MonoBehaviour
     [SerializeField] private float maxZoom = 16f;
     [SerializeField] private Vector2 boundsMin = new Vector2(-20f, -12f);
     [SerializeField] private Vector2 boundsMax = new Vector2(20f, 12f);
+    [SerializeField] private bool ignoreInputOverUi = true;
 
     private Vector3 lastPointerWorldPosition;
     private bool isPanning;
+    private bool panBlockedUntilPointerRelease;
 
     private void Awake()
     {
@@ -46,6 +49,7 @@ public class CameraRigController : MonoBehaviour
         if (GetActiveTouchCount() > 1)
         {
             isPanning = false;
+            panBlockedUntilPointerRelease = false;
             return;
         }
 
@@ -56,6 +60,14 @@ public class CameraRigController : MonoBehaviour
 
         if (pointerDown)
         {
+            if (ignoreInputOverUi && IsPointerOverUi())
+            {
+                isPanning = false;
+                panBlockedUntilPointerRelease = true;
+                return;
+            }
+
+            panBlockedUntilPointerRelease = false;
             isPanning = true;
             lastPointerWorldPosition = targetCamera.ScreenToWorldPoint(pointerPosition);
             return;
@@ -64,6 +76,14 @@ public class CameraRigController : MonoBehaviour
         if (!pointerHeld)
         {
             isPanning = false;
+            panBlockedUntilPointerRelease = false;
+            return;
+        }
+
+        if (ignoreInputOverUi && panBlockedUntilPointerRelease)
+        {
+            isPanning = false;
+            panBlockedUntilPointerRelease = true;
             return;
         }
 
@@ -84,6 +104,11 @@ public class CameraRigController : MonoBehaviour
 
     private void HandleZoomInput()
     {
+        if (ignoreInputOverUi && IsPointerOverUi())
+        {
+            return;
+        }
+
         float zoomDelta = 0f;
 
         if (TryGetPinchDelta(out float pinchDelta))
@@ -233,5 +258,28 @@ public class CameraRigController : MonoBehaviour
 
         pinchDelta = currentDistance - previousDistance;
         return true;
+    }
+
+    private static bool IsPointerOverUi()
+    {
+        if (EventSystem.current == null)
+        {
+            return false;
+        }
+
+        Touchscreen touchscreen = Touchscreen.current;
+        if (touchscreen != null)
+        {
+            for (int i = 0; i < touchscreen.touches.Count; i++)
+            {
+                var touch = touchscreen.touches[i];
+                if (touch.press.isPressed && EventSystem.current.IsPointerOverGameObject(touch.touchId.ReadValue()))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return EventSystem.current.IsPointerOverGameObject(-1);
     }
 }
