@@ -13,55 +13,55 @@ MonoBehaviour:
   m_Name: LevelData
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   levelId: level_01
-  backgroundSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  backgroundSprite: {fileID: -7443756053782179069, guid: 6e6da76977035433e912e7456e730724, type: 3}
   backgroundPosition: {x: 0, y: 0, z: 0}
   backgroundScale: {x: 1, y: 1, z: 1}
   backgroundSortingOrder: -100
-  cameraBoundsMin: {x: -20, y: -12}
-  cameraBoundsMax: {x: 20, y: 12}
+  cameraBoundsMin: {x: -8, y: -12}
+  cameraBoundsMax: {x: 8, y: 12}
   itemPlacements:
   - ItemId: a
-    Position: {x: -1.92793, y: 2.97454, z: 0}
-    Scale: {x: 1, y: 1, z: 1}
+    Position: {x: -3.2999878, y: -3.9000244, z: 0}
+    Scale: {x: 0.15, y: 0.15, z: 0.15}
     RotationZ: 0
     SortingOrder: 0
   - ItemId: a
-    Position: {x: 10.56207, y: 13.474541, z: 0}
-    Scale: {x: 1, y: 1, z: 1}
+    Position: {x: 3.7700195, y: -1.0300293, z: 0}
+    Scale: {x: 0.1, y: 0.1, z: 0.1}
     RotationZ: 0
     SortingOrder: 0
   - ItemId: a
-    Position: {x: -16.23793, y: 9.57454, z: 0}
-    Scale: {x: 1, y: 1, z: 1}
+    Position: {x: 2.9470215, y: 0.4790039, z: 0}
+    Scale: {x: 0.07, y: 0.07, z: 0.07}
     RotationZ: 0
     SortingOrder: 0
   - ItemId: b
-    Position: {x: -7.57793, y: 2.8345401, z: 0}
-    Scale: {x: 1, y: 1, z: 1}
-    RotationZ: 0
+    Position: {x: -3.8189697, y: -6.557007, z: 0}
+    Scale: {x: 0.07, y: 0.07, z: 0.07}
+    RotationZ: 342.63998
     SortingOrder: 0
   - ItemId: b
-    Position: {x: -1.87793, y: 16.52454, z: 0}
-    Scale: {x: 1, y: 1, z: 1}
-    RotationZ: 0
+    Position: {x: 0.1619873, y: -5.436035, z: 0}
+    Scale: {x: 0.08, y: 0.08, z: 0.08}
+    RotationZ: 85.29001
     SortingOrder: 0
   - ItemId: b
-    Position: {x: 21.822071, y: 1.5745401, z: 0}
-    Scale: {x: 1, y: 1, z: 1}
+    Position: {x: 2.513977, y: -4.2580566, z: 0}
+    Scale: {x: 0.1, y: 0.1, z: 0.1}
+    RotationZ: 325.76
+    SortingOrder: 0
+  - ItemId: c
+    Position: {x: 2.8099976, y: -2.5200195, z: 0}
+    Scale: {x: 0.07, y: 0.07, z: 0.07}
     RotationZ: 0
     SortingOrder: 0
   - ItemId: c
-    Position: {x: 7.11207, y: -2.43546, z: 0}
-    Scale: {x: 1, y: 1, z: 1}
+    Position: {x: -1.8599854, y: 0.4300537, z: 0}
+    Scale: {x: 0.07, y: 0.07, z: 0.07}
     RotationZ: 0
     SortingOrder: 0
   - ItemId: c
-    Position: {x: 2.8220701, y: 12.91454, z: 0}
-    Scale: {x: 1, y: 1, z: 1}
-    RotationZ: 0
-    SortingOrder: 0
-  - ItemId: c
-    Position: {x: -0.27793002, y: -9.82546, z: 0}
-    Scale: {x: 1, y: 1, z: 1}
+    Position: {x: -4.1400146, y: 4.98999, z: 0}
+    Scale: {x: 0.05, y: 0.05, z: 0.05}
     RotationZ: 0
     SortingOrder: 0
