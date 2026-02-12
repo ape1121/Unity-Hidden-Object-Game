@@ -16,8 +16,9 @@ MonoBehaviour:
   mainSceneName: Main
   gameSceneName: Game
   defaultLevelId: level_01
-  coinRewardIntervalSeconds: 5
+  coinRewardIntervalSeconds: 0.5
   coinRewardPerInterval: 1
   popupCanvasPrefab: {fileID: 6410438596636778884, guid: 4546ffee74996458cbc866038f07b43a, type: 3}
   popupPrefabs:
-  - {fileID: 7137359552040780050, guid: bee94fea19d9a4501a87cf6f1cbf8ee7, type: 3}
+  - {fileID: 8059798142211199245, guid: 168ff2399f47b46ca9c4b3e950bb72c0, type: 3}
+  - {fileID: 4587772805669807347, guid: bee94fea19d9a4501a87cf6f1cbf8ee7, type: 3}

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class GameUI : CanvasGroupUserInterface
+public class GameUI : PausableScreenUI
 {
     [Header("Dependencies")]
     [SerializeField] private HiddenItemSpawner hiddenItemSpawner;
@@ -17,6 +17,9 @@ public class GameUI : CanvasGroupUserInterface
     [Header("Collection Timing")]
     [SerializeField, Min(0f), FormerlySerializedAs("boardHitLeadTime")]
     private float targetHitLeadTime = 0.025f;
+
+    [Header("Actions")]
+    [SerializeField] private Button homeButton;
 
     private bool initialized;
     private bool processingCollectedQueue;
@@ -65,8 +68,23 @@ public class GameUI : CanvasGroupUserInterface
         processingCollectedQueue = false;
     }
 
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+
+        if (homeButton != null)
+        {
+            homeButton.onClick.AddListener(HandleHomeButtonClicked);
+        }
+    }
+
     protected override void OnDisable()
     {
+        if (homeButton != null)
+        {
+            homeButton.onClick.RemoveListener(HandleHomeButtonClicked);
+        }
+
         base.OnDisable();
         Shutdown();
     }
@@ -285,6 +303,20 @@ public class GameUI : CanvasGroupUserInterface
     private void CommitCollection(ItemData itemData)
     {
         remainingItems?.ConsumeCollectedItem(itemData);
+    }
+
+    private void HandleHomeButtonClicked()
+    {
+        if (App.Sessions != null)
+        {
+            App.Sessions.AbortToMain();
+            App.Sessions.ResetToIdle();
+        }
+
+        if (App.Scenes != null)
+        {
+            App.Scenes.LoadMain();
+        }
     }
 
     private void TryAdvanceUiWorkflow()

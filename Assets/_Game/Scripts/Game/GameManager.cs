@@ -171,7 +171,13 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        App.Sessions.StartSession(App.Config.DefaultLevelId);
+        string levelId = App.Config.DefaultLevelId;
+        if (App.Saves != null)
+        {
+            levelId = App.Saves.GetCurrentLevelOrDefault();
+        }
+
+        App.Sessions.StartSession(levelId);
         ApplySessionState(App.Sessions.State);
     }
 

@@ -1,4 +1,5 @@
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,9 +13,6 @@ public abstract class CanvasGroupUserInterface : MonoBehaviour, UserInterface
     [SerializeField] private Ease exitEase = Ease.InCubic;
     [SerializeField] private bool hideOnExit = false;
 
-    [Header("Actions")]
-    [SerializeField] private Button pauseButton;
-
     private Tween visibilityTween;
 
     protected virtual void Awake()
@@ -24,17 +22,14 @@ public abstract class CanvasGroupUserInterface : MonoBehaviour, UserInterface
 
     protected virtual void OnEnable()
     {
-        BindPauseButton();
     }
 
     protected virtual void OnDisable()
     {
-        UnbindPauseButton();
     }
 
     protected virtual void OnDestroy()
     {
-        UnbindPauseButton();
         visibilityTween?.Kill();
     }
 
@@ -125,6 +120,44 @@ public abstract class CanvasGroupUserInterface : MonoBehaviour, UserInterface
         }
     }
 
+#if UNITY_EDITOR
+    protected virtual void OnValidate()
+    {
+        EnsureCanvasGroup();
+    }
+#endif
+}
+
+public abstract class PausableScreenUI : CanvasGroupUserInterface
+{
+    [Header("Actions")]
+    [SerializeField] private Button pauseButton;
+
+    [Header("Economy")]
+    [SerializeField] private TMP_Text goldText;
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        BindPauseButton();
+        BindCoinEvents();
+        RefreshGoldText();
+    }
+
+    protected override void OnDisable()
+    {
+        UnbindPauseButton();
+        UnbindCoinEvents();
+        base.OnDisable();
+    }
+
+    protected override void OnDestroy()
+    {
+        UnbindPauseButton();
+        UnbindCoinEvents();
+        base.OnDestroy();
+    }
+
     private void BindPauseButton()
     {
         if (pauseButton == null)
@@ -173,10 +206,45 @@ public abstract class CanvasGroupUserInterface : MonoBehaviour, UserInterface
         }
     }
 
-#if UNITY_EDITOR
-    protected virtual void OnValidate()
+    private void BindCoinEvents()
     {
-        EnsureCanvasGroup();
+        if (App.Coins == null)
+        {
+            return;
+        }
+
+        App.Coins.OnCoinsChanged -= HandleCoinsChanged;
+        App.Coins.OnCoinsChanged += HandleCoinsChanged;
     }
-#endif
+
+    private void UnbindCoinEvents()
+    {
+        if (App.Coins == null)
+        {
+            return;
+        }
+
+        App.Coins.OnCoinsChanged -= HandleCoinsChanged;
+    }
+
+    private void HandleCoinsChanged(int totalCoins, int sessionCoins, int deltaCoins)
+    {
+        SetGoldText(totalCoins);
+    }
+
+    private void RefreshGoldText()
+    {
+        int totalCoins = App.Coins != null ? App.Coins.TotalCoins : 0;
+        SetGoldText(totalCoins);
+    }
+
+    private void SetGoldText(int totalCoins)
+    {
+        if (goldText == null)
+        {
+            return;
+        }
+
+        goldText.text = totalCoins.ToString();
+    }
 }

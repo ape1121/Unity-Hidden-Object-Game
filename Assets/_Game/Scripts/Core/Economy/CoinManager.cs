@@ -47,13 +47,23 @@ public sealed class CoinManager
     public void BeginSession()
     {
         SessionCoins = 0;
-        intervalAccumulator = 0f;
         OnCoinsChanged?.Invoke(TotalCoins, SessionCoins, 0);
+    }
+
+    public void SetTotalCoins(int totalCoins, bool notify = true)
+    {
+        TotalCoins = Mathf.Max(0, totalCoins);
+        SessionCoins = Mathf.Clamp(SessionCoins, 0, TotalCoins);
+
+        if (notify)
+        {
+            OnCoinsChanged?.Invoke(TotalCoins, SessionCoins, 0);
+        }
     }
 
     public int Tick(float deltaTime)
     {
-        if (sessionManager == null || sessionManager.State != GameSessionState.Running || deltaTime <= 0f)
+        if (deltaTime <= 0f)
         {
             return 0;
         }
@@ -72,7 +82,11 @@ public sealed class CoinManager
         }
 
         TotalCoins += awardedCoins;
-        SessionCoins += awardedCoins;
+        if (sessionManager != null && sessionManager.State != GameSessionState.Idle)
+        {
+            SessionCoins += awardedCoins;
+        }
+
         OnCoinsChanged?.Invoke(TotalCoins, SessionCoins, awardedCoins);
         return awardedCoins;
     }
