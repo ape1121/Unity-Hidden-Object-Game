@@ -29,9 +29,6 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        ResolveMissingReferences();
-        ReportMissingReferences();
-
         if (uiManager != null)
         {
             uiManager.Configure(hiddenItemSpawner, hiddenItemCollector, remainingItems);
@@ -64,61 +61,5 @@ public class GameManager : MonoBehaviour
     private void OnDestroy()
     {
         ShutdownGame();
-    }
-
-    private void ResolveMissingReferences()
-    {
-        if (levelRuntimeMap == null)
-        {
-            levelRuntimeMap = FindFirstObjectByType<LevelRuntimeMap>();
-        }
-
-        if (hiddenItemSpawner == null)
-        {
-            hiddenItemSpawner = FindFirstObjectByType<HiddenItemSpawner>();
-        }
-
-        if (hiddenItemCollector == null)
-        {
-            hiddenItemCollector = FindFirstObjectByType<HiddenItemCollector>();
-        }
-
-        if (remainingItems == null)
-        {
-            remainingItems = FindFirstObjectByType<RemainingItems>();
-        }
-
-        if (uiManager == null)
-        {
-            uiManager = FindFirstObjectByType<UIManager>();
-        }
-    }
-
-    private void ReportMissingReferences()
-    {
-        if (uiManager == null)
-        {
-            Debug.LogWarning("GameManager: UIManager reference is missing.");
-        }
-
-        if (levelRuntimeMap == null)
-        {
-            Debug.LogWarning("GameManager: LevelRuntimeMap reference is missing.");
-        }
-
-        if (hiddenItemSpawner == null)
-        {
-            Debug.LogWarning("GameManager: HiddenItemSpawner reference is missing.");
-        }
-
-        if (hiddenItemCollector == null)
-        {
-            Debug.LogWarning("GameManager: HiddenItemCollector reference is missing.");
-        }
-
-        if (remainingItems == null)
-        {
-            Debug.LogWarning("GameManager: RemainingItems reference is missing.");
-        }
     }
 }

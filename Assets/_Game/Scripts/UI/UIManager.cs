@@ -41,10 +41,7 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        ResolveMissingReferences();
-        ReportMissingReferences();
         SubscribeToEvents();
-
         HandleItemsSpawned(hiddenItemSpawner != null ? hiddenItemSpawner.SpawnedItems : null);
         initialized = true;
     }
@@ -71,52 +68,6 @@ public class UIManager : MonoBehaviour
     private void OnDisable()
     {
         Shutdown();
-    }
-
-    private void ResolveMissingReferences()
-    {
-        if (hiddenItemSpawner == null)
-        {
-            hiddenItemSpawner = FindFirstObjectByType<HiddenItemSpawner>();
-        }
-
-        if (hiddenItemCollector == null)
-        {
-            hiddenItemCollector = FindFirstObjectByType<HiddenItemCollector>();
-        }
-
-        if (remainingItems == null)
-        {
-            remainingItems = FindFirstObjectByType<RemainingItems>();
-        }
-
-        if (collectionAnimator == null)
-        {
-            collectionAnimator = FindFirstObjectByType<UICollectionAnimator>();
-        }
-    }
-
-    private void ReportMissingReferences()
-    {
-        if (hiddenItemSpawner == null)
-        {
-            Debug.LogWarning("UIManager: HiddenItemSpawner reference is missing.");
-        }
-
-        if (hiddenItemCollector == null)
-        {
-            Debug.LogWarning("UIManager: HiddenItemCollector reference is missing.");
-        }
-
-        if (remainingItems == null)
-        {
-            Debug.LogWarning("UIManager: RemainingItems reference is missing.");
-        }
-
-        if (collectionAnimator == null)
-        {
-            Debug.LogWarning("UIManager: UICollectionAnimator reference is missing. Collection will skip fly animation.");
-        }
     }
 
     private void SubscribeToEvents()
