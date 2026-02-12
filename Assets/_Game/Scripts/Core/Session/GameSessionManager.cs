@@ -27,11 +27,6 @@ public sealed class GameSessionManager
 
     public void PauseSession()
     {
-        if (State != GameSessionState.Running)
-        {
-            return;
-        }
-
         SetState(GameSessionState.Paused);
     }
 
