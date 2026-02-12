@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10365990819d24495a8cae16b5121de2, type: 3}
+  m_Name: LevelData
+  m_EditorClassIdentifier: Assembly-CSharp::LevelData
+  levelId: level_01
+  backgroundSprite: {fileID: -1459906406579450406, guid: e394a4922e6284a45a56d3f87f1488c8, type: 3}
+  backgroundPosition: {x: 0, y: 0, z: 0}
+  backgroundScale: {x: 1, y: 1, z: 1}
+  backgroundSortingOrder: -100
+  cameraBoundsMin: {x: -20, y: -12}
+  cameraBoundsMax: {x: 20, y: 12}
+  itemPlacements:
+  - ItemId: a
+    Position: {x: -1.92793, y: 2.97454, z: 0}
+    Scale: {x: 1, y: 1, z: 1}
+    RotationZ: 0
+    SortingOrder: 0
+  - ItemId: a
+    Position: {x: 10.56207, y: 13.474541, z: 0}
+    Scale: {x: 1, y: 1, z: 1}
+    RotationZ: 0
+    SortingOrder: 0
+  - ItemId: a
+    Position: {x: -16.23793, y: 9.57454, z: 0}
+    Scale: {x: 1, y: 1, z: 1}
+    RotationZ: 0
+    SortingOrder: 0
+  - ItemId: b
+    Position: {x: -7.57793, y: 2.8345401, z: 0}
+    Scale: {x: 1, y: 1, z: 1}
+    RotationZ: 0
+    SortingOrder: 0
+  - ItemId: b
+    Position: {x: -1.87793, y: 16.52454, z: 0}
+    Scale: {x: 1, y: 1, z: 1}
+    RotationZ: 0
+    SortingOrder: 0
+  - ItemId: b
+    Position: {x: 21.822071, y: 1.5745401, z: 0}
+    Scale: {x: 1, y: 1, z: 1}
+    RotationZ: 0
+    SortingOrder: 0
+  - ItemId: c
+    Position: {x: 7.11207, y: -2.43546, z: 0}
+    Scale: {x: 1, y: 1, z: 1}
+    RotationZ: 0
+    SortingOrder: 0
+  - ItemId: c
+    Position: {x: 2.8220701, y: 12.91454, z: 0}
+    Scale: {x: 1, y: 1, z: 1}
+    RotationZ: 0
+    SortingOrder: 0
+  - ItemId: c
+    Position: {x: -0.27793002, y: -9.82546, z: 0}
+    Scale: {x: 1, y: 1, z: 1}
+    RotationZ: 0
+    SortingOrder: 0
