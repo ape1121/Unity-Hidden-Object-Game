@@ -17,6 +17,12 @@ public sealed class BoosterManager : MonoBehaviour
     [SerializeField, Min(1f)] private float boosterSpotlightMinimumDiameter = 300f;
     [SerializeField] private Ease boosterHintEase = Ease.OutCubic;
 
+    [Header("Booster Camera Focus")]
+    [SerializeField] private bool useHighlightZoom = true;
+    [SerializeField, Min(0f)] private float highlightPanDuration = 0.35f;
+    [SerializeField, Min(0f)] private float highlightZoomDuration = 0.35f;
+    [SerializeField, Min(0f)] private float highlightZoomSize = 7f;
+
     private Sequence boosterHintSequence;
     private GameManager gameManager;
     private Texture2D runtimeSpotlightTexture;
@@ -50,7 +56,11 @@ public sealed class BoosterManager : MonoBehaviour
         CameraRigController cameraController = ResolveCameraRigController();
         if (cameraController != null)
         {
-            cameraController.CenterOnWorldPosition(targetItem.transform.position);
+            cameraController.FocusOnWorldPosition(
+                targetItem.transform.position,
+                useHighlightZoom ? highlightZoomSize : (float?)null,
+                highlightPanDuration,
+                highlightZoomDuration);
         }
 
         ShowBoosterHint(targetItem);
@@ -313,7 +323,7 @@ public sealed class BoosterManager : MonoBehaviour
 
         Sequence sequence = DOTween.Sequence();
         sequence.Append(boosterBackground.DOFade(boosterBackgroundAlpha, boosterBackgroundFadeDuration).SetEase(boosterHintEase));
-        sequence.Append(boosterSpotlightCircle.DOFade(1f, boosterSpotlightFadeDuration).SetEase(boosterHintEase));
+        sequence.Join(boosterSpotlightCircle.DOFade(1f, boosterSpotlightFadeDuration).SetEase(boosterHintEase));
         sequence.AppendInterval(boosterSpotlightHoldDuration);
         sequence.Append(boosterSpotlightCircle.DOFade(0f, boosterSpotlightFadeDuration * 0.8f).SetEase(Ease.InCubic));
         sequence.Join(boosterBackground.DOFade(0f, boosterBackgroundFadeDuration * 0.8f).SetEase(Ease.InCubic));

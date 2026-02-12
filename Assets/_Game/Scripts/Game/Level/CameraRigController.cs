@@ -76,6 +76,20 @@ public class CameraRigController : MonoBehaviour
         MoveCameraTo(worldPosition, panSmoothDuration);
     }
 
+    public void FocusOnWorldPosition(
+        Vector3 worldPosition,
+        float? zoomValue,
+        float panDuration,
+        float zoomDuration)
+    {
+        if (zoomValue.HasValue)
+        {
+            MoveZoomTo(zoomValue.Value, zoomDuration);
+        }
+
+        MoveCameraTo(worldPosition, panDuration);
+    }
+
     private void HandlePanInput()
     {
         // Do not pan while pinching.

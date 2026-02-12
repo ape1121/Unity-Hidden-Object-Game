@@ -1469,13 +1469,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BoosterManager
   boosterBackground: {fileID: 0}
   boosterSpotlightCircle: {fileID: 0}
-  boosterBackgroundAlpha: 0.7
+  boosterBackgroundAlpha: 0.762
   boosterBackgroundFadeDuration: 0.3
   boosterSpotlightFadeDuration: 0.2
   boosterSpotlightHoldDuration: 1.1
-  boosterSpotlightPadding: 150
+  boosterSpotlightPadding: 250
   boosterSpotlightMinimumDiameter: 300
   boosterHintEase: 9
+  useHighlightZoom: 1
+  highlightPanDuration: 0.35
+  highlightZoomDuration: 0.35
+  highlightZoomSize: 7
 --- !u!1 &1501294049
 GameObject:
   m_ObjectHideFlags: 0
