@@ -126,10 +126,16 @@ public class UIManager : MonoBehaviour
         bool hasSourceBounds = false;
         Bounds sourceBounds = default;
         Vector3 sourceWorldPosition = hiddenItem.transform.position;
+        float sourceZRotationDegrees = hiddenItem.transform.eulerAngles.z;
         SpriteRenderer sourceRenderer = hiddenItem.SpriteRenderer;
         if (sourceRenderer == null)
         {
             sourceRenderer = hiddenItem.GetComponentInChildren<SpriteRenderer>();
+        }
+
+        if (sourceRenderer != null)
+        {
+            sourceZRotationDegrees = sourceRenderer.transform.eulerAngles.z;
         }
 
         if (sourceRenderer != null && sourceRenderer.sprite != null)
@@ -144,7 +150,8 @@ public class UIManager : MonoBehaviour
             WorldPosition = sourceWorldPosition,
             ItemData = hiddenItem.ItemData,
             HasSourceBounds = hasSourceBounds,
-            SourceBounds = sourceBounds
+            SourceBounds = sourceBounds,
+            SourceZRotationDegrees = sourceZRotationDegrees
         };
         return true;
     }
@@ -214,7 +221,8 @@ public class UIManager : MonoBehaviour
             target.TargetRect,
             target.TargetImage,
             entry.HasSourceBounds,
-            entry.SourceBounds);
+            entry.SourceBounds,
+            entry.SourceZRotationDegrees);
 
         if (flyTween == null)
         {
@@ -295,6 +303,7 @@ public class UIManager : MonoBehaviour
         public ItemData ItemData;
         public bool HasSourceBounds;
         public Bounds SourceBounds;
+        public float SourceZRotationDegrees;
     }
 
     private struct CollectionTarget

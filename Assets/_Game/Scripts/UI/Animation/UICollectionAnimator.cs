@@ -28,12 +28,12 @@ public class UICollectionAnimator : MonoBehaviour
 
     public Tween PlayCollectToBoard(Vector3 sourceWorldPosition, Sprite icon, RectTransform targetRect)
     {
-        return PlayCollectToBoard(sourceWorldPosition, icon, targetRect, null, false, default);
+        return PlayCollectToBoard(sourceWorldPosition, icon, targetRect, null, false, default, 0f);
     }
 
     public Tween PlayCollectToBoard(Vector3 sourceWorldPosition, Sprite icon, RectTransform targetRect, Image targetImage)
     {
-        return PlayCollectToBoard(sourceWorldPosition, icon, targetRect, targetImage, false, default);
+        return PlayCollectToBoard(sourceWorldPosition, icon, targetRect, targetImage, false, default, 0f);
     }
 
     public Tween PlayCollectToBoard(
@@ -42,7 +42,8 @@ public class UICollectionAnimator : MonoBehaviour
         RectTransform targetRect,
         Image targetImage,
         bool hasSourceBounds,
-        Bounds sourceBounds)
+        Bounds sourceBounds,
+        float sourceZRotationDegrees = 0f)
     {
         ResolveReferences();
 
@@ -94,6 +95,7 @@ public class UICollectionAnimator : MonoBehaviour
 
         flyRect.anchoredPosition = startLocal;
         flyRect.localScale = Vector3.one * startScale;
+        flyRect.localRotation = Quaternion.Euler(0f, 0f, sourceZRotationDegrees);
         flyRect.SetAsLastSibling();
 
         float popT = 0f;
@@ -116,6 +118,7 @@ public class UICollectionAnimator : MonoBehaviour
         sequence.Append(moveTween);
         sequence.Join(flyRect.DOScale(1f, flightDuration).SetEase(Ease.InQuad));
         sequence.Join(flyRect.DOSizeDelta(targetSize, flightDuration).SetEase(sizeEase));
+        sequence.Join(flyRect.DOLocalRotate(Vector3.zero, flightDuration).SetEase(Ease.OutSine));
         sequence.OnComplete(() =>
         {
             if (flyImage != null)
