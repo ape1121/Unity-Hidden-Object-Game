@@ -28,9 +28,14 @@ public class HiddenItemCollector : MonoBehaviour
 
     private void HandleHiddenItemClicked(HiddenItem hiddenItem)
     {
+        TryCollect(hiddenItem);
+    }
+
+    public bool TryCollect(HiddenItem hiddenItem)
+    {
         if (hiddenItem == null || !CanCollectHiddenItem(hiddenItem) || !hiddenItem.TryMarkCollected())
         {
-            return;
+            return false;
         }
 
         OnHiddenItemCollected?.Invoke(hiddenItem);
@@ -44,6 +49,8 @@ public class HiddenItemCollector : MonoBehaviour
         {
             Destroy(hiddenItem.gameObject);
         }
+
+        return true;
     }
 
     private bool CanCollectHiddenItem(HiddenItem hiddenItem)

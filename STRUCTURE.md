@@ -20,8 +20,13 @@ Build order is already correct:
 
 ### Game orchestration
 - `GameManager`
-  - Initializes `UIManager` and `LevelRuntimeMap`.
-  - Wires existing managers via scene references.
+  - Scene-local gameplay orchestrator for the Game scene.
+  - Initializes `GameUI`, `LevelRuntimeMap`, and `BoosterManager`.
+  - Owns game session transitions (`start`, `pause`, `complete`, `return to main`).
+  - Handles UI action requests from `GameUI` (pause/home/booster).
+  - `BoosterManager`
+    - Pure gameplay service initialized by `GameManager`.
+    - Consumes booster requests and collects one valid remaining hidden item through `HiddenItemCollector`.
 
 ### Level and item runtime
 - `LevelRuntimeMap`
@@ -43,9 +48,9 @@ Build order is already correct:
 ### UI runtime
 - `RemainingItems` / `RemainingItem`
   - Builds and updates "remaining targets" UI list.
-- `UIManager`
-  - Subscribes to spawn/collect events.
-  - Queues collection animations and commits UI updates.
+- `GameUI`
+  - Handles UI concerns (button bindings, collection animation queue, remaining-items updates).
+  - Does not execute gameplay actions directly; forwards pause/home/booster requests to `GameManager`.
 - `UICollectionAnimator`
   - DOTween-based fly-to-target animation.
 
@@ -55,12 +60,11 @@ Build order is already correct:
 - `LevelAuthoringRoot`, `LevelItemMarker`, and editor tooling.
 
 ## Gap vs Target Vertical Slice
-- No persistent app entry point (`App.cs`) yet.
-- No scene-flow controller that owns transitions (`Loader -> Main -> Game` and return).
-- No game session state manager (`start/pause/end`).
-- No coin system (elapsed-time reward).
-- No dedicated popup flow (pause popup, level-complete popup).
-- No explicit UI enter/exit screen transition system for scene-level menus.
+- Main scene and popup UX still need final polish and tighter action routing consistency.
+- Game scene architecture is now split by responsibility:
+  - `GameManager` owns gameplay/session decisions.
+  - `GameUI` owns presentation and UI event forwarding.
+  - `BoosterManager` handles booster gameplay behavior.
 
 ---
 
@@ -113,10 +117,12 @@ Assets/_Game/Scripts
   Features/
     Gameplay/
       GameManager.cs
+      Boosters/
+        BoosterManager.cs
       HiddenItems/
       Level/
     UI/
-      UIManager.cs
+      GameUI.cs
       Animation/
       Screens/
         MainScreenController.cs
@@ -175,7 +181,17 @@ Notes:
 
 ### Existing `GameManager` (scene-local)
 - Keeps orchestration for runtime scene components.
+- Initializes and owns scene-local gameplay services (including `BoosterManager`).
+- Binds `GameUI` action requests to gameplay decisions.
 - Not global; called by app/session flow.
+
+### `BoosterManager` (scene-local gameplay service)
+- Initialized by `GameManager`.
+- Executes booster use logic against current spawned hidden items.
+
+### Existing `GameUI` (scene-local presentation)
+- Manages in-game HUD interactions and collection animations.
+- For gameplay-affecting buttons (pause/home/booster), raises requests handled by `GameManager`.
 
 ---
 
@@ -193,6 +209,7 @@ Notes:
    - Hidden item mechanics run (already implemented).
    - Camera pan/zoom runs (already implemented).
    - CoinManager increments over elapsed running time.
+   - Booster button click -> `GameUI` request -> `GameManager.UseBooster()` -> `BoosterManager.UseBooster()`.
 8. Pause:
    - `GameSessionManager.PauseSession()`.
    - Pause popup shown.

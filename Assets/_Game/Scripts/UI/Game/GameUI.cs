@@ -9,9 +9,6 @@ using UnityEngine.UI;
 public class GameUI : SceneUserInterface
 {
     [Header("Dependencies")]
-    [SerializeField] private HiddenItemSpawner hiddenItemSpawner;
-    [SerializeField] private HiddenItemCollector hiddenItemCollector;
-    [SerializeField] private RemainingItems remainingItems;
     [SerializeField] private UICollectionAnimator collectionAnimator;
 
     [Header("Collection Timing")]
@@ -20,22 +17,17 @@ public class GameUI : SceneUserInterface
 
     [Header("Actions")]
     [SerializeField] private Button homeButton;
+    [SerializeField] private Button boosterButton;
 
     private bool initialized;
     private bool processingCollectedQueue;
     private readonly Queue<PendingCollection> pendingCollections = new Queue<PendingCollection>();
+    private GameManager gameManager;
+    private Action pauseRequestedHandler;
+    private Action homeRequestedHandler;
+    private Action boosterRequestedHandler;
 
     private bool HasPendingCollections => pendingCollections.Count > 0;
-
-    public void Configure(
-        HiddenItemSpawner spawner,
-        HiddenItemCollector collector,
-        RemainingItems remaining)
-    {
-        hiddenItemSpawner = spawner;
-        hiddenItemCollector = collector;
-        remainingItems = remaining;
-    }
 
     public void Initialize()
     {
@@ -44,9 +36,23 @@ public class GameUI : SceneUserInterface
             return;
         }
 
+        ResolveGameManagerReference();
         SubscribeToEvents();
-        HandleItemsSpawned(hiddenItemSpawner != null ? hiddenItemSpawner.SpawnedItems : null);
+        HiddenItemSpawner spawner = gameManager != null ? gameManager.HiddenItemSpawner : null;
+        HandleItemsSpawned(spawner != null ? spawner.SpawnedItems : null);
         initialized = true;
+    }
+
+    public void BindGameManager(GameManager manager)
+    {
+        gameManager = manager;
+    }
+
+    public void BindGameplayActions(Action onPauseRequested, Action onHomeRequested, Action onBoosterRequested)
+    {
+        pauseRequestedHandler = onPauseRequested;
+        homeRequestedHandler = onHomeRequested;
+        boosterRequestedHandler = onBoosterRequested;
     }
 
     public void Shutdown()
@@ -76,6 +82,11 @@ public class GameUI : SceneUserInterface
         {
             homeButton.onClick.AddListener(HandleHomeButtonClicked);
         }
+
+        if (boosterButton != null)
+        {
+            boosterButton.onClick.AddListener(HandleBoosterButtonClicked);
+        }
     }
 
     protected override void OnDisable()
@@ -85,38 +96,53 @@ public class GameUI : SceneUserInterface
             homeButton.onClick.RemoveListener(HandleHomeButtonClicked);
         }
 
+        if (boosterButton != null)
+        {
+            boosterButton.onClick.RemoveListener(HandleBoosterButtonClicked);
+        }
+
         base.OnDisable();
         Shutdown();
     }
 
+    private void HandleBoosterButtonClicked()
+    {
+        boosterRequestedHandler?.Invoke();
+    }
+
     private void SubscribeToEvents()
     {
-        if (hiddenItemSpawner != null)
+        HiddenItemSpawner spawner = gameManager != null ? gameManager.HiddenItemSpawner : null;
+        if (spawner != null)
         {
-            hiddenItemSpawner.OnItemsSpawned += HandleItemsSpawned;
+            spawner.OnItemsSpawned += HandleItemsSpawned;
         }
 
-        if (hiddenItemCollector != null)
+        HiddenItemCollector collector = gameManager != null ? gameManager.HiddenItemCollector : null;
+        if (collector != null)
         {
-            hiddenItemCollector.OnHiddenItemCollected += HandleHiddenItemCollected;
+            collector.OnHiddenItemCollected += HandleHiddenItemCollected;
         }
     }
 
     private void UnsubscribeFromEvents()
     {
-        if (hiddenItemSpawner != null)
+        HiddenItemSpawner spawner = gameManager != null ? gameManager.HiddenItemSpawner : null;
+        if (spawner != null)
         {
-            hiddenItemSpawner.OnItemsSpawned -= HandleItemsSpawned;
+            spawner.OnItemsSpawned -= HandleItemsSpawned;
         }
 
-        if (hiddenItemCollector != null)
+        HiddenItemCollector collector = gameManager != null ? gameManager.HiddenItemCollector : null;
+        if (collector != null)
         {
-            hiddenItemCollector.OnHiddenItemCollected -= HandleHiddenItemCollected;
+            collector.OnHiddenItemCollected -= HandleHiddenItemCollected;
         }
     }
 
     private void HandleItemsSpawned(IReadOnlyList<HiddenItem> spawnedItems)
     {
+        RemainingItems remainingItems = gameManager != null ? gameManager.RemainingItems : null;
         if (remainingItems != null)
         {
             remainingItems.BuildFromSpawnedItems(spawnedItems);
@@ -211,6 +237,7 @@ public class GameUI : SceneUserInterface
         RectTransform targetRect = null;
         Image targetImage = null;
 
+        RemainingItems remainingItems = gameManager != null ? gameManager.RemainingItems : null;
         if (remainingItems != null)
         {
             remainingItems.TryGetItemAnimationTarget(itemId, out targetRect, out targetImage);
@@ -302,21 +329,18 @@ public class GameUI : SceneUserInterface
 
     private void CommitCollection(ItemData itemData)
     {
+        RemainingItems remainingItems = gameManager != null ? gameManager.RemainingItems : null;
         remainingItems?.ConsumeCollectedItem(itemData);
     }
 
     private void HandleHomeButtonClicked()
     {
-        if (App.Sessions != null)
-        {
-            App.Sessions.AbortToMain();
-            App.Sessions.ResetToIdle();
-        }
+        homeRequestedHandler?.Invoke();
+    }
 
-        if (App.Scenes != null)
-        {
-            App.Scenes.LoadMain();
-        }
+    protected override void PauseGameAndOpenMenu()
+    {
+        pauseRequestedHandler?.Invoke();
     }
 
     private void TryAdvanceUiWorkflow()
@@ -328,6 +352,14 @@ public class GameUI : SceneUserInterface
 
         processingCollectedQueue = true;
         StartCoroutine(ProcessCollectedQueue());
+    }
+
+    private void ResolveGameManagerReference()
+    {
+        if (gameManager == null)
+        {
+            gameManager = FindFirstObjectByType<GameManager>();
+        }
     }
 
     private struct PendingCollection

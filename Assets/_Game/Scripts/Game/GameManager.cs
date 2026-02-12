@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private HiddenItemSpawner hiddenItemSpawner;
     [SerializeField] private HiddenItemCollector hiddenItemCollector;
     [SerializeField] private RemainingItems remainingItems;
+    
     [FormerlySerializedAs("uiManager")]
     [SerializeField] private GameUI gameUI;
     [SerializeField] private HiddenItemInput hiddenItemInput;
@@ -17,12 +18,16 @@ public class GameManager : MonoBehaviour
     [Header("Startup")]
     [SerializeField] private bool initializeOnStart = true;
 
+    private BoosterManager boosterManager;
     private bool initialized;
     private bool sessionBound;
     private bool paused;
     private bool levelCompletedRaised;
 
     public event Action LevelCompleted;
+    public HiddenItemSpawner HiddenItemSpawner => hiddenItemSpawner;
+    public HiddenItemCollector HiddenItemCollector => hiddenItemCollector;
+    public RemainingItems RemainingItems => remainingItems;
 
     private void Start()
     {
@@ -40,10 +45,12 @@ public class GameManager : MonoBehaviour
         }
 
         ResolveOptionalReferences();
+        InitializeBoosterManager();
 
         if (gameUI != null)
         {
-            gameUI.Configure(hiddenItemSpawner, hiddenItemCollector, remainingItems);
+            gameUI.BindGameManager(this);
+            gameUI.BindGameplayActions(HandlePauseRequested, HandleReturnToMainRequested, HandleBoosterRequested);
             gameUI.Initialize();
         }
 
@@ -74,7 +81,9 @@ public class GameManager : MonoBehaviour
 
         if (gameUI != null)
         {
+            gameUI.BindGameplayActions(null, null, null);
             gameUI.Shutdown();
+            gameUI.BindGameManager(null);
         }
 
         if (remainingItems != null)
@@ -152,6 +161,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public bool UseBooster()
+    {
+        if (!initialized || boosterManager == null)
+        {
+            return false;
+        }
+
+        if (App.Sessions == null || App.Sessions.State != GameSessionState.Running)
+        {
+            return false;
+        }
+
+        return boosterManager.UseBooster();
+    }
+
     private void HandleAllItemsCollected()
     {
         if (levelCompletedRaised)
@@ -162,6 +186,21 @@ public class GameManager : MonoBehaviour
         levelCompletedRaised = true;
         LevelCompleted?.Invoke();
         CompleteLevel();
+    }
+
+    private void HandlePauseRequested()
+    {
+        PauseGame();
+    }
+
+    private void HandleReturnToMainRequested()
+    {
+        ReturnToMain();
+    }
+
+    private void HandleBoosterRequested()
+    {
+        UseBooster();
     }
 
     private void StartSession()
@@ -253,6 +292,16 @@ public class GameManager : MonoBehaviour
         {
             cameraRigController = FindFirstObjectByType<CameraRigController>();
         }
+    }
+
+    private void InitializeBoosterManager()
+    {
+        if (boosterManager == null)
+        {
+            boosterManager = new BoosterManager();
+        }
+
+        boosterManager.Initialize(hiddenItemSpawner, hiddenItemCollector);
     }
 
     private void OnDestroy()
