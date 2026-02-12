@@ -111,6 +111,7 @@ public sealed class BoosterManager : MonoBehaviour
             return;
         }
 
+        StopBoosterHintSequence();
         EnsureBoosterHintVisuals();
         RectTransform root = ResolveOverlayRoot();
         if (boosterBackground == null || boosterSpotlightCircle == null || root == null)
@@ -313,7 +314,6 @@ public sealed class BoosterManager : MonoBehaviour
 
     private void PlayBoosterHintSequence()
     {
-        StopBoosterHintSequence();
         SetImageAlpha(boosterBackground, 0f);
         SetImageAlpha(boosterSpotlightCircle, 0f);
         boosterBackground.transform.SetAsLastSibling();
