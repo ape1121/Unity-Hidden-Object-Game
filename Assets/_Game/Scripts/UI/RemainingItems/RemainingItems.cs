@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RemainingItems : MonoBehaviour
 {
@@ -113,6 +114,25 @@ public class RemainingItems : MonoBehaviour
         }
 
         entriesById[itemData.Id] = entry;
+    }
+
+    public bool TryGetItemAnimationTarget(string itemId, out RectTransform targetRect, out Image targetImage)
+    {
+        targetRect = null;
+        targetImage = null;
+
+        if (string.IsNullOrWhiteSpace(itemId))
+        {
+            return false;
+        }
+
+        RemainingEntry entry;
+        if (!entriesById.TryGetValue(itemId, out entry) || entry.View == null)
+        {
+            return false;
+        }
+
+        return entry.View.TryGetAnimationTarget(out targetRect, out targetImage);
     }
 
     public void ClearAll()

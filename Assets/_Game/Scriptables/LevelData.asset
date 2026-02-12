@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: LevelData
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   levelId: level_01
-  backgroundSprite: {fileID: -1459906406579450406, guid: e394a4922e6284a45a56d3f87f1488c8, type: 3}
+  backgroundSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   backgroundPosition: {x: 0, y: 0, z: 0}
   backgroundScale: {x: 1, y: 1, z: 1}
   backgroundSortingOrder: -100

@@ -6,7 +6,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LevelRuntimeMap levelRuntimeMap;
     [SerializeField] private HiddenItemSpawner hiddenItemSpawner;
     [SerializeField] private HiddenItemCollector hiddenItemCollector;
-    [SerializeField] private MatchBoard matchBoard;
     [SerializeField] private RemainingItems remainingItems;
     [SerializeField] private UIManager uiManager;
 
@@ -35,13 +34,8 @@ public class GameManager : MonoBehaviour
 
         if (uiManager != null)
         {
-            uiManager.Configure(hiddenItemSpawner, hiddenItemCollector, matchBoard, remainingItems);
+            uiManager.Configure(hiddenItemSpawner, hiddenItemCollector, remainingItems);
             uiManager.Initialize();
-        }
-
-        if (matchBoard != null)
-        {
-            matchBoard.InitializeBoard();
         }
 
         if (levelRuntimeMap != null)
@@ -89,11 +83,6 @@ public class GameManager : MonoBehaviour
             hiddenItemCollector = FindFirstObjectByType<HiddenItemCollector>();
         }
 
-        if (matchBoard == null)
-        {
-            matchBoard = FindFirstObjectByType<MatchBoard>();
-        }
-
         if (remainingItems == null)
         {
             remainingItems = FindFirstObjectByType<RemainingItems>();
@@ -110,11 +99,6 @@ public class GameManager : MonoBehaviour
         if (uiManager == null)
         {
             Debug.LogWarning("GameManager: UIManager reference is missing.");
-        }
-
-        if (matchBoard == null)
-        {
-            Debug.LogWarning("GameManager: MatchBoard reference is missing.");
         }
 
         if (levelRuntimeMap == null)

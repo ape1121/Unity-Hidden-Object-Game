@@ -6,7 +6,13 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/_Game/Scenes/TownMatch.unity
+    path: Assets/_Game/Scenes/Loader.unity
+    guid: 50500f74f6ddc4c538107b23a3ee07f2
+  - enabled: 1
+    path: Assets/_Game/Scenes/Main.unity
+    guid: 8ed1dfc77a1c246078eb0437ad183f2c
+  - enabled: 1
+    path: Assets/_Game/Scenes/Game.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

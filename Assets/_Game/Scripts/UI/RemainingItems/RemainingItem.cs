@@ -14,6 +14,13 @@ public class RemainingItem : MonoBehaviour
     public string ItemId => itemId;
     public int Count => count;
 
+    public bool TryGetAnimationTarget(out RectTransform targetRect, out Image targetImage)
+    {
+        targetImage = iconImage;
+        targetRect = iconImage != null ? iconImage.rectTransform : null;
+        return targetRect != null;
+    }
+
     public void Set(ItemData itemData, int remainingCount)
     {
         itemId = itemData.Id;
