@@ -12,13 +12,13 @@ public class GameManager : MonoBehaviour
     
     [FormerlySerializedAs("uiManager")]
     [SerializeField] private GameUI gameUI;
+    [SerializeField] private BoosterManager boosterManager;
     [SerializeField] private HiddenItemInput hiddenItemInput;
     [SerializeField] private CameraRigController cameraRigController;
 
     [Header("Startup")]
     [SerializeField] private bool initializeOnStart = true;
 
-    private BoosterManager boosterManager;
     private bool initialized;
     private bool sessionBound;
     private bool paused;
@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour
     public HiddenItemSpawner HiddenItemSpawner => hiddenItemSpawner;
     public HiddenItemCollector HiddenItemCollector => hiddenItemCollector;
     public RemainingItems RemainingItems => remainingItems;
+    public CameraRigController CameraRigController => cameraRigController;
+    public RectTransform UiOverlayRoot => gameUI != null ? gameUI.transform as RectTransform : null;
 
     private void Start()
     {
@@ -173,7 +175,7 @@ public class GameManager : MonoBehaviour
             return false;
         }
 
-        return boosterManager.UseBooster();
+        return boosterManager.TryUseBooster();
     }
 
     private void HandleAllItemsCollected()
@@ -285,23 +287,29 @@ public class GameManager : MonoBehaviour
     {
         if (hiddenItemInput == null)
         {
-            hiddenItemInput = FindFirstObjectByType<HiddenItemInput>();
+            hiddenItemInput = GetComponent<HiddenItemInput>();
         }
 
         if (cameraRigController == null)
         {
-            cameraRigController = FindFirstObjectByType<CameraRigController>();
+            cameraRigController = GetComponent<CameraRigController>();
+        }
+
+        if (boosterManager == null)
+        {
+            boosterManager = GetComponent<BoosterManager>();
         }
     }
 
     private void InitializeBoosterManager()
     {
+        ResolveOptionalReferences();
         if (boosterManager == null)
         {
-            boosterManager = new BoosterManager();
+            boosterManager = gameObject.AddComponent<BoosterManager>();
         }
 
-        boosterManager.Initialize(hiddenItemSpawner, hiddenItemCollector);
+        boosterManager.Configure(this);
     }
 
     private void OnDestroy()

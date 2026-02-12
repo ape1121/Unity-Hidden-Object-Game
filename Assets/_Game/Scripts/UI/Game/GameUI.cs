@@ -358,7 +358,7 @@ public class GameUI : SceneUserInterface
     {
         if (gameManager == null)
         {
-            gameManager = FindFirstObjectByType<GameManager>();
+            gameManager = GetComponentInParent<GameManager>();
         }
     }
 

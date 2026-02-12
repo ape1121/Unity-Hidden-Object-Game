@@ -333,10 +333,6 @@ public class UICollectionAnimator : MonoBehaviour
         if (targetCanvas == null)
         {
             targetCanvas = GetComponentInParent<Canvas>();
-            if (targetCanvas == null)
-            {
-                targetCanvas = FindFirstObjectByType<Canvas>();
-            }
         }
 
         if (worldCamera == null)

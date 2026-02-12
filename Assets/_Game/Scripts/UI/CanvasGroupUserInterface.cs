@@ -26,11 +26,14 @@ public abstract class CanvasGroupUserInterface : MonoBehaviour, UserInterface
 
     protected virtual void OnDisable()
     {
+        visibilityTween?.Kill(false);
+        visibilityTween = null;
     }
 
     protected virtual void OnDestroy()
     {
-        visibilityTween?.Kill();
+        visibilityTween?.Kill(false);
+        visibilityTween = null;
     }
 
     public virtual void Enter(bool instant = false)
@@ -56,6 +59,8 @@ public abstract class CanvasGroupUserInterface : MonoBehaviour, UserInterface
         visibilityTween = canvasGroup
             .DOFade(1f, enterDuration)
             .SetEase(enterEase)
+            .SetLink(gameObject, LinkBehaviour.KillOnDestroy)
+            .OnKill(() => visibilityTween = null)
             .OnComplete(SetVisibleState);
     }
 
@@ -80,6 +85,8 @@ public abstract class CanvasGroupUserInterface : MonoBehaviour, UserInterface
         visibilityTween = canvasGroup
             .DOFade(0f, exitDuration)
             .SetEase(exitEase)
+            .SetLink(gameObject, LinkBehaviour.KillOnDestroy)
+            .OnKill(() => visibilityTween = null)
             .OnComplete(SetHiddenState);
     }
 

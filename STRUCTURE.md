@@ -24,9 +24,9 @@ Build order is already correct:
   - Initializes `GameUI`, `LevelRuntimeMap`, and `BoosterManager`.
   - Owns game session transitions (`start`, `pause`, `complete`, `return to main`).
   - Handles UI action requests from `GameUI` (pause/home/booster).
-  - `BoosterManager`
-    - Pure gameplay service initialized by `GameManager`.
-    - Consumes booster requests and collects one valid remaining hidden item through `HiddenItemCollector`.
+- `BoosterManager`
+  - Scene-local `MonoBehaviour` configured by `GameManager`.
+  - Owns booster flow end-to-end: target selection, camera centering, and spotlight hint presentation.
 
 ### Level and item runtime
 - `LevelRuntimeMap`
@@ -187,7 +187,8 @@ Notes:
 
 ### `BoosterManager` (scene-local gameplay service)
 - Initialized by `GameManager`.
-- Executes booster use logic against current spawned hidden items.
+- Resolves a hint target from current spawned hidden items.
+- Handles booster camera and spotlight hint behavior through serialized settings.
 
 ### Existing `GameUI` (scene-local presentation)
 - Manages in-game HUD interactions and collection animations.
@@ -209,7 +210,8 @@ Notes:
    - Hidden item mechanics run (already implemented).
    - Camera pan/zoom runs (already implemented).
    - CoinManager increments over elapsed running time.
-   - Booster button click -> `GameUI` request -> `GameManager.UseBooster()` -> `BoosterManager.UseBooster()`.
+   - Booster button click -> `GameUI` request -> `GameManager.UseBooster()` -> `BoosterManager.TryUseBooster()`.
+   - `BoosterManager` recenters camera as much as map bounds allow, then plays booster spotlight hint.
 8. Pause:
    - `GameSessionManager.PauseSession()`.
    - Pause popup shown.

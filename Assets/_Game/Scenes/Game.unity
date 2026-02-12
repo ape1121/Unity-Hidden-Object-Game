@@ -445,6 +445,10 @@ MonoBehaviour:
   boundsMin: {x: -1, y: -5}
   boundsMax: {x: 1, y: 10}
   ignoreInputOverUi: 1
+  panSmoothDuration: 0.2
+  zoomSmoothDuration: 0.2
+  panSmoothEase: 9
+  zoomSmoothEase: 9
 --- !u!114 &519420034
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1407,6 +1411,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1495803076}
   - component: {fileID: 1495803075}
+  - component: {fileID: 1495803077}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1431,6 +1436,7 @@ MonoBehaviour:
   hiddenItemCollector: {fileID: 519420034}
   remainingItems: {fileID: 1343725524}
   gameUI: {fileID: 1501294056}
+  boosterManager: {fileID: 1495803077}
   hiddenItemInput: {fileID: 519420035}
   cameraRigController: {fileID: 519420033}
   initializeOnStart: 1
@@ -1449,6 +1455,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1495803077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1495803074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 171fd9d3e6ee74745bee4fcaf5189994, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BoosterManager
+  boosterBackground: {fileID: 0}
+  boosterSpotlightCircle: {fileID: 0}
+  boosterBackgroundAlpha: 0.7
+  boosterBackgroundFadeDuration: 0.3
+  boosterSpotlightFadeDuration: 0.2
+  boosterSpotlightHoldDuration: 1.1
+  boosterSpotlightPadding: 150
+  boosterSpotlightMinimumDiameter: 300
+  boosterHintEase: 9
 --- !u!1 &1501294049
 GameObject:
   m_ObjectHideFlags: 0
@@ -1461,11 +1488,11 @@ GameObject:
   - component: {fileID: 1501294052}
   - component: {fileID: 1501294051}
   - component: {fileID: 1501294050}
+  - component: {fileID: 1501294057}
   - component: {fileID: 1501294055}
   - component: {fileID: 1501294056}
-  - component: {fileID: 1501294057}
   m_Layer: 5
-  m_Name: UICanvas
+  m_Name: GameUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1610,9 +1637,6 @@ MonoBehaviour:
   hideOnExit: 0
   pauseButton: {fileID: 1887436053}
   goldText: {fileID: 529206156}
-  hiddenItemSpawner: {fileID: 1360924120}
-  hiddenItemCollector: {fileID: 519420034}
-  remainingItems: {fileID: 1343725524}
   collectionAnimator: {fileID: 1501294055}
   targetHitLeadTime: 0.025
   homeButton: {fileID: 1002134477}

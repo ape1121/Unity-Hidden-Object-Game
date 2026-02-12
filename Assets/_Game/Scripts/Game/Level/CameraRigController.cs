@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -11,10 +12,20 @@ public class CameraRigController : MonoBehaviour
     [SerializeField] private Vector2 boundsMin = new Vector2(-20f, -12f);
     [SerializeField] private Vector2 boundsMax = new Vector2(20f, 12f);
     [SerializeField] private bool ignoreInputOverUi = true;
+    [SerializeField, Min(0f)] private float panSmoothDuration = 0.12f;
+    [SerializeField, Min(0f)] private float zoomSmoothDuration = 0.12f;
+    [SerializeField] private Ease panSmoothEase = Ease.OutCubic;
+    [SerializeField] private Ease zoomSmoothEase = Ease.OutCubic;
 
     private Vector3 lastPointerWorldPosition;
     private bool isPanning;
     private bool panBlockedUntilPointerRelease;
+    private Tweener panTween;
+    private Tweener zoomTween;
+    private Vector3 desiredCameraPosition;
+    private float desiredOrthographicSize;
+
+    public Camera TargetCamera => targetCamera;
 
     private void Awake()
     {
@@ -22,6 +33,23 @@ public class CameraRigController : MonoBehaviour
         {
             targetCamera = Camera.main;
         }
+
+        CacheDesiredCameraState();
+    }
+
+    private void OnEnable()
+    {
+        CacheDesiredCameraState();
+    }
+
+    private void OnDisable()
+    {
+        StopCameraTweens();
+    }
+
+    private void OnDestroy()
+    {
+        StopCameraTweens();
     }
 
     private void LateUpdate()
@@ -41,6 +69,11 @@ public class CameraRigController : MonoBehaviour
         boundsMin = min;
         boundsMax = max;
         ClampCameraToBounds();
+    }
+
+    public void CenterOnWorldPosition(Vector3 worldPosition)
+    {
+        MoveCameraTo(worldPosition, panSmoothDuration);
     }
 
     private void HandlePanInput()
@@ -68,6 +101,8 @@ public class CameraRigController : MonoBehaviour
             }
 
             panBlockedUntilPointerRelease = false;
+            StopPanTween();
+            desiredCameraPosition = targetCamera.transform.position;
             isPanning = true;
             lastPointerWorldPosition = targetCamera.ScreenToWorldPoint(pointerPosition);
             return;
@@ -97,8 +132,7 @@ public class CameraRigController : MonoBehaviour
         Vector3 currentPointerWorldPosition = targetCamera.ScreenToWorldPoint(pointerPosition);
         Vector3 delta = lastPointerWorldPosition - currentPointerWorldPosition;
         delta.z = 0f;
-        targetCamera.transform.position += delta;
-        ClampCameraToBounds();
+        MoveCameraTo(desiredCameraPosition + delta, panSmoothDuration);
         lastPointerWorldPosition = targetCamera.ScreenToWorldPoint(pointerPosition);
     }
 
@@ -129,13 +163,25 @@ public class CameraRigController : MonoBehaviour
             return;
         }
 
-        float targetZoom = targetCamera.orthographicSize - (zoomDelta * zoomSpeed * Time.deltaTime * 60f);
-        targetCamera.orthographicSize = Mathf.Clamp(targetZoom, minZoom, maxZoom);
+        float targetZoom = desiredOrthographicSize - (zoomDelta * zoomSpeed * Time.deltaTime * 60f);
+        MoveZoomTo(targetZoom, zoomSmoothDuration);
     }
 
     private void ClampCameraToBounds()
     {
-        float verticalExtent = targetCamera.orthographicSize;
+        Vector3 position = GetClampedCameraPosition(targetCamera.transform.position, targetCamera.orthographicSize);
+        targetCamera.transform.position = position;
+        desiredCameraPosition = GetClampedCameraPosition(desiredCameraPosition, desiredOrthographicSize);
+    }
+
+    private Vector3 GetClampedCameraPosition(Vector3 position, float zoomValue)
+    {
+        if (targetCamera == null)
+        {
+            return position;
+        }
+
+        float verticalExtent = zoomValue;
         float horizontalExtent = verticalExtent * targetCamera.aspect;
 
         float minX = boundsMin.x + horizontalExtent;
@@ -143,10 +189,10 @@ public class CameraRigController : MonoBehaviour
         float minY = boundsMin.y + verticalExtent;
         float maxY = boundsMax.y - verticalExtent;
 
-        Vector3 position = targetCamera.transform.position;
         position.x = ClampAxis(position.x, minX, maxX);
         position.y = ClampAxis(position.y, minY, maxY);
-        targetCamera.transform.position = position;
+        position.z = targetCamera.transform.position.z;
+        return position;
     }
 
     private static float ClampAxis(float value, float min, float max)
@@ -281,5 +327,110 @@ public class CameraRigController : MonoBehaviour
         }
 
         return EventSystem.current.IsPointerOverGameObject(-1);
+    }
+
+    private void MoveCameraTo(Vector3 worldPosition, float duration, bool instant = false)
+    {
+        if (targetCamera == null)
+        {
+            return;
+        }
+
+        worldPosition.z = targetCamera.transform.position.z;
+        desiredCameraPosition = GetClampedCameraPosition(worldPosition, desiredOrthographicSize);
+
+        if (instant || duration <= 0f)
+        {
+            StopPanTween();
+            targetCamera.transform.position = desiredCameraPosition;
+            ClampCameraToBounds();
+            return;
+        }
+
+        if (panTween != null && panTween.IsActive())
+        {
+            panTween.ChangeEndValue(desiredCameraPosition, true);
+            return;
+        }
+
+        panTween = targetCamera.transform
+            .DOMove(desiredCameraPosition, duration)
+            .SetEase(panSmoothEase)
+            .SetUpdate(UpdateType.Late)
+            .OnUpdate(ClampCameraToBounds)
+            .OnKill(() => panTween = null);
+    }
+
+    private void MoveZoomTo(float zoomValue, float duration, bool instant = false)
+    {
+        if (targetCamera == null)
+        {
+            return;
+        }
+
+        desiredOrthographicSize = Mathf.Clamp(zoomValue, minZoom, maxZoom);
+
+        if (instant || duration <= 0f)
+        {
+            StopZoomTween();
+            targetCamera.orthographicSize = desiredOrthographicSize;
+            ClampCameraToBounds();
+            return;
+        }
+
+        if (zoomTween != null && zoomTween.IsActive())
+        {
+            zoomTween.ChangeEndValue(desiredOrthographicSize, true);
+            return;
+        }
+
+        zoomTween = DOTween
+            .To(
+                () => targetCamera.orthographicSize,
+                value =>
+                {
+                    targetCamera.orthographicSize = value;
+                    ClampCameraToBounds();
+                },
+                desiredOrthographicSize,
+                duration)
+            .SetEase(zoomSmoothEase)
+            .SetUpdate(UpdateType.Late)
+            .OnKill(() => zoomTween = null);
+    }
+
+    private void CacheDesiredCameraState()
+    {
+        if (targetCamera == null)
+        {
+            return;
+        }
+
+        desiredCameraPosition = targetCamera.transform.position;
+        desiredOrthographicSize = Mathf.Clamp(targetCamera.orthographicSize, minZoom, maxZoom);
+    }
+
+    private void StopPanTween()
+    {
+        if (panTween != null)
+        {
+            panTween.Kill();
+            panTween = null;
+        }
+    }
+
+    private void StopZoomTween()
+    {
+        if (zoomTween != null)
+        {
+            zoomTween.Kill();
+            zoomTween = null;
+        }
+    }
+
+    private void StopCameraTweens()
+    {
+        StopPanTween();
+        StopZoomTween();
     }
 }
