@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "LevelData", menuName = "TownMatch/Level Data", order = 2)]
+[CreateAssetMenu(fileName = "LevelData", menuName = "SearchIt/Level Data", order = 2)]
 public class LevelData : ScriptableObject
 {
     [SerializeField] private string levelId = "level_01";

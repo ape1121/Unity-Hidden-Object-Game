@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AllItems
   items:
   - Id: a
-    Name: a
+    Name: Patates
     Icon: {fileID: -594753259779395408, guid: 84f625f6959914176bd972d6bae11984, type: 3}
   - Id: b
-    Name: b
+    Name: Havuc
     Icon: {fileID: -5989229662981140105, guid: 2bed57ecb0f35424daa85c98a6ad4497, type: 3}
   - Id: c
-    Name: c
+    Name: Turp
     Icon: {fileID: 6312458932616184003, guid: 40b800e5f63c94071bc5a8b57d0f7d88, type: 3}

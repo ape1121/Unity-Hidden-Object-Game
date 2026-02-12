@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "AllItems", menuName = "TownMatch/AllItems", order = 1)]
+[CreateAssetMenu(fileName = "AllItems", menuName = "SearchIt/AllItems", order = 1)]
 public class AllItems : ScriptableObject
 {
     [SerializeField] private ItemData[] items;
