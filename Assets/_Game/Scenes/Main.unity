@@ -879,12 +879,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainUI
   canvasGroup: {fileID: 1385137736}
-  enterDuration: 0.2
+  enterDuration: 0.5
   exitDuration: 0.16
   enterEase: 9
   exitEase: 8
-  hideOnExit: 1
-  pauseButton: {fileID: 335435109}
+  hideOnExit: 0
+  pauseButton: {fileID: 0}
   goldText: {fileID: 775485093}
   playButton: {fileID: 1970967372}
   enterOnEnable: 1

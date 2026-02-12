@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -23,6 +24,8 @@ public class GameManager : MonoBehaviour
     private bool sessionBound;
     private bool paused;
     private bool levelCompletedRaised;
+    private Coroutine uiExitToMainCoroutine;
+    private Coroutine uiExitToWinCoroutine;
 
     public event Action LevelCompleted;
     public HiddenItemSpawner HiddenItemSpawner => hiddenItemSpawner;
@@ -80,6 +83,8 @@ public class GameManager : MonoBehaviour
         {
             return;
         }
+
+        StopUiExitCoroutines();
 
         if (gameUI != null)
         {
@@ -197,7 +202,18 @@ public class GameManager : MonoBehaviour
 
     private void HandleReturnToMainRequested()
     {
-        ReturnToMain();
+        if (uiExitToMainCoroutine != null)
+        {
+            return;
+        }
+
+        if (!initialized)
+        {
+            ReturnToMain();
+            return;
+        }
+
+        uiExitToMainCoroutine = StartCoroutine(ExitUiThenReturnToMain());
     }
 
     private void HandleBoosterRequested()
@@ -258,27 +274,38 @@ public class GameManager : MonoBehaviour
         bool shouldPause = state == GameSessionState.Paused || state == GameSessionState.Completed;
         SetPaused(shouldPause);
 
-        if (App.Popups == null)
-        {
-            return;
-        }
-
         switch (state)
         {
             case GameSessionState.Paused:
-                App.Popups.Open(PopupType.Pause);
-                App.Popups.Close(PopupType.Win);
+                if (App.Popups != null)
+                {
+                    App.Popups.Open(PopupType.Pause);
+                    App.Popups.Close(PopupType.Win);
+                }
                 break;
             case GameSessionState.Completed:
-                App.Popups.Close(PopupType.Pause);
-                App.Popups.Open(PopupType.Win);
+                if (App.Popups != null)
+                {
+                    App.Popups.Close(PopupType.Pause);
+                }
+
+                if (uiExitToWinCoroutine == null)
+                {
+                    uiExitToWinCoroutine = StartCoroutine(ExitUiThenOpenWinPopup());
+                }
                 break;
             case GameSessionState.Running:
-                App.Popups.Close(PopupType.Pause);
-                App.Popups.Close(PopupType.Win);
+                if (App.Popups != null)
+                {
+                    App.Popups.Close(PopupType.Pause);
+                    App.Popups.Close(PopupType.Win);
+                }
                 break;
             default:
-                App.Popups.CloseAll();
+                if (App.Popups != null)
+                {
+                    App.Popups.CloseAll();
+                }
                 break;
         }
     }
@@ -314,6 +341,8 @@ public class GameManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        StopUiExitCoroutines();
+
         if (App.Sessions != null && App.Sessions.State != GameSessionState.Idle)
         {
             App.Sessions.AbortToMain();
@@ -322,5 +351,63 @@ public class GameManager : MonoBehaviour
 
         SetPaused(false);
         ShutdownGame();
+    }
+
+    private IEnumerator ExitUiThenReturnToMain()
+    {
+        if (uiExitToWinCoroutine != null)
+        {
+            StopCoroutine(uiExitToWinCoroutine);
+            uiExitToWinCoroutine = null;
+        }
+
+        SetPaused(true);
+        yield return PlayGameUiExitTransition();
+        ReturnToMain();
+        uiExitToMainCoroutine = null;
+    }
+
+    private IEnumerator ExitUiThenOpenWinPopup()
+    {
+        yield return PlayGameUiExitTransition();
+
+        if (App.Sessions != null && App.Sessions.State == GameSessionState.Completed && App.Popups != null)
+        {
+            App.Popups.Open(PopupType.Win);
+        }
+
+        uiExitToWinCoroutine = null;
+    }
+
+    private IEnumerator PlayGameUiExitTransition()
+    {
+        if (gameUI == null)
+        {
+            yield break;
+        }
+
+        gameUI.Exit();
+        float exitDuration = gameUI.GetExitTransitionDuration();
+        if (exitDuration <= 0f)
+        {
+            yield break;
+        }
+
+        yield return new WaitForSecondsRealtime(exitDuration);
+    }
+
+    private void StopUiExitCoroutines()
+    {
+        if (uiExitToMainCoroutine != null)
+        {
+            StopCoroutine(uiExitToMainCoroutine);
+            uiExitToMainCoroutine = null;
+        }
+
+        if (uiExitToWinCoroutine != null)
+        {
+            StopCoroutine(uiExitToWinCoroutine);
+            uiExitToWinCoroutine = null;
+        }
     }
 }

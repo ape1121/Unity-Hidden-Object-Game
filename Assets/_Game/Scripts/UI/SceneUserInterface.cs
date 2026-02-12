@@ -1,4 +1,3 @@
-
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +9,9 @@ public abstract class SceneUserInterface : CanvasGroupUserInterface
 
     [Header("Economy")]
     [SerializeField] private TMP_Text goldText;
+
+    protected Button PauseButton => pauseButton;
+    protected TMP_Text GoldText => goldText;
 
     protected override void OnEnable()
     {

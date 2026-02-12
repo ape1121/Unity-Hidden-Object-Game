@@ -18,6 +18,20 @@ public class GameUI : SceneUserInterface
     [Header("Actions")]
     [SerializeField] private Button homeButton;
     [SerializeField] private Button boosterButton;
+    [SerializeField] private RectTransform pauseButtonContainer;
+    [SerializeField] private RectTransform goldContainer;
+    [SerializeField] private RectTransform itemInventory;
+
+    [Header("Panel Transitions")]
+    [SerializeField] private bool enterOnEnable = true;
+    [SerializeField] private bool enterInstantOnEnable = false;
+    [SerializeField, Min(0f)] private float panelEnterDuration = 0.28f;
+    [SerializeField, Min(0f)] private float panelExitDuration = 0.22f;
+    [SerializeField, Min(0f)] private float leftSlideDistance = 180f;
+    [SerializeField, Min(0f)] private float rightSlideDistance = 180f;
+    [SerializeField, Min(0f)] private float bottomSlideDistance = 180f;
+    [SerializeField] private Ease panelEnterEase = Ease.OutCubic;
+    [SerializeField] private Ease panelExitEase = Ease.InCubic;
 
     private bool initialized;
     private bool processingCollectedQueue;
@@ -26,6 +40,12 @@ public class GameUI : SceneUserInterface
     private Action pauseRequestedHandler;
     private Action homeRequestedHandler;
     private Action boosterRequestedHandler;
+    private Sequence panelTransitionSequence;
+    private bool panelAnchorsCached;
+    private Vector2 homeButtonAnchor;
+    private Vector2 pauseButtonAnchor;
+    private Vector2 goldContainerAnchor;
+    private Vector2 itemInventoryAnchor;
 
     private bool HasPendingCollections => pendingCollections.Count > 0;
 
@@ -74,6 +94,67 @@ public class GameUI : SceneUserInterface
         processingCollectedQueue = false;
     }
 
+    public override void Enter(bool instant = false)
+    {
+        ResolveTransitionReferences();
+        CachePanelAnchors();
+        KillPanelTransitionTween();
+        ApplyPanelHiddenState();
+
+        if (instant || panelEnterDuration <= 0f)
+        {
+            ApplyPanelVisibleState();
+            base.Enter(true);
+            return;
+        }
+
+        base.Enter(false);
+        panelTransitionSequence = DOTween.Sequence()
+            .SetLink(gameObject, LinkBehaviour.KillOnDestroy)
+            .OnKill(() => panelTransitionSequence = null);
+
+        JoinPanelMove(panelTransitionSequence, GetHomeButtonRect(), homeButtonAnchor, panelEnterDuration, panelEnterEase);
+        JoinPanelMove(panelTransitionSequence, goldContainer, goldContainerAnchor, panelEnterDuration, panelEnterEase);
+        JoinPanelMove(panelTransitionSequence, pauseButtonContainer, pauseButtonAnchor, panelEnterDuration, panelEnterEase);
+        JoinPanelMove(panelTransitionSequence, itemInventory, itemInventoryAnchor, panelEnterDuration, panelEnterEase);
+    }
+
+    public override void Exit(bool instant = false)
+    {
+        ResolveTransitionReferences();
+        CachePanelAnchors();
+        KillPanelTransitionTween();
+
+        if (instant || panelExitDuration <= 0f)
+        {
+            ApplyPanelHiddenState();
+            base.Exit(true);
+            return;
+        }
+
+        ApplyPanelVisibleState();
+        base.Exit(false);
+        panelTransitionSequence = DOTween.Sequence()
+            .SetLink(gameObject, LinkBehaviour.KillOnDestroy)
+            .OnKill(() => panelTransitionSequence = null);
+
+        JoinPanelMove(panelTransitionSequence, GetHomeButtonRect(), GetHomeHiddenAnchor(), panelExitDuration, panelExitEase);
+        JoinPanelMove(panelTransitionSequence, goldContainer, GetGoldHiddenAnchor(), panelExitDuration, panelExitEase);
+        JoinPanelMove(panelTransitionSequence, pauseButtonContainer, GetPauseHiddenAnchor(), panelExitDuration, panelExitEase);
+        JoinPanelMove(panelTransitionSequence, itemInventory, GetInventoryHiddenAnchor(), panelExitDuration, panelExitEase);
+    }
+
+    public override float GetExitTransitionDuration(bool instant = false)
+    {
+        float baseDuration = base.GetExitTransitionDuration(instant);
+        if (instant || panelExitDuration <= 0f)
+        {
+            return baseDuration;
+        }
+
+        return Mathf.Max(baseDuration, panelExitDuration);
+    }
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -87,10 +168,17 @@ public class GameUI : SceneUserInterface
         {
             boosterButton.onClick.AddListener(HandleBoosterButtonClicked);
         }
+
+        if (enterOnEnable)
+        {
+            Enter(enterInstantOnEnable);
+        }
     }
 
     protected override void OnDisable()
     {
+        KillPanelTransitionTween();
+
         if (homeButton != null)
         {
             homeButton.onClick.RemoveListener(HandleHomeButtonClicked);
@@ -103,6 +191,12 @@ public class GameUI : SceneUserInterface
 
         base.OnDisable();
         Shutdown();
+    }
+
+    protected override void OnDestroy()
+    {
+        KillPanelTransitionTween();
+        base.OnDestroy();
     }
 
     private void HandleBoosterButtonClicked()
@@ -360,6 +454,130 @@ public class GameUI : SceneUserInterface
         {
             gameManager = GetComponentInParent<GameManager>();
         }
+    }
+
+    private void ResolveTransitionReferences()
+    {
+        if (pauseButtonContainer == null && PauseButton != null)
+        {
+            pauseButtonContainer = PauseButton.transform as RectTransform;
+        }
+
+        if (goldContainer == null && GoldText != null)
+        {
+            RectTransform goldTextRect = GoldText.rectTransform;
+            if (goldTextRect != null)
+            {
+                goldContainer = goldTextRect.parent as RectTransform;
+                if (goldContainer == null)
+                {
+                    goldContainer = goldTextRect;
+                }
+            }
+        }
+    }
+
+    private void CachePanelAnchors()
+    {
+        if (panelAnchorsCached)
+        {
+            return;
+        }
+
+        RectTransform homeRect = GetHomeButtonRect();
+        if (homeRect != null)
+        {
+            homeButtonAnchor = homeRect.anchoredPosition;
+        }
+
+        if (pauseButtonContainer != null)
+        {
+            pauseButtonAnchor = pauseButtonContainer.anchoredPosition;
+        }
+
+        if (goldContainer != null)
+        {
+            goldContainerAnchor = goldContainer.anchoredPosition;
+        }
+
+        if (itemInventory != null)
+        {
+            itemInventoryAnchor = itemInventory.anchoredPosition;
+        }
+
+        panelAnchorsCached = true;
+    }
+
+    private void ApplyPanelVisibleState()
+    {
+        SetAnchoredPosition(GetHomeButtonRect(), homeButtonAnchor);
+        SetAnchoredPosition(goldContainer, goldContainerAnchor);
+        SetAnchoredPosition(pauseButtonContainer, pauseButtonAnchor);
+        SetAnchoredPosition(itemInventory, itemInventoryAnchor);
+    }
+
+    private void ApplyPanelHiddenState()
+    {
+        SetAnchoredPosition(GetHomeButtonRect(), GetHomeHiddenAnchor());
+        SetAnchoredPosition(goldContainer, GetGoldHiddenAnchor());
+        SetAnchoredPosition(pauseButtonContainer, GetPauseHiddenAnchor());
+        SetAnchoredPosition(itemInventory, GetInventoryHiddenAnchor());
+    }
+
+    private Vector2 GetHomeHiddenAnchor()
+    {
+        return homeButtonAnchor + (Vector2.left * leftSlideDistance);
+    }
+
+    private Vector2 GetGoldHiddenAnchor()
+    {
+        return goldContainerAnchor + (Vector2.left * leftSlideDistance);
+    }
+
+    private Vector2 GetPauseHiddenAnchor()
+    {
+        return pauseButtonAnchor + (Vector2.right * rightSlideDistance);
+    }
+
+    private Vector2 GetInventoryHiddenAnchor()
+    {
+        return itemInventoryAnchor + (Vector2.down * bottomSlideDistance);
+    }
+
+    private static void SetAnchoredPosition(RectTransform targetRect, Vector2 anchoredPosition)
+    {
+        if (targetRect == null)
+        {
+            return;
+        }
+
+        targetRect.anchoredPosition = anchoredPosition;
+    }
+
+    private static void JoinPanelMove(Sequence sequence, RectTransform targetRect, Vector2 endPosition, float duration, Ease ease)
+    {
+        if (sequence == null || targetRect == null)
+        {
+            return;
+        }
+
+        sequence.Join(targetRect.DOAnchorPos(endPosition, duration).SetEase(ease));
+    }
+
+    private void KillPanelTransitionTween()
+    {
+        if (panelTransitionSequence == null)
+        {
+            return;
+        }
+
+        panelTransitionSequence.Kill();
+        panelTransitionSequence = null;
+    }
+
+    private RectTransform GetHomeButtonRect()
+    {
+        return homeButton != null ? homeButton.transform as RectTransform : null;
     }
 
     private struct PendingCollection

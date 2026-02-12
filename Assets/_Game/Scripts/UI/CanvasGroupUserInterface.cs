@@ -90,6 +90,26 @@ public abstract class CanvasGroupUserInterface : MonoBehaviour, UserInterface
             .OnComplete(SetHiddenState);
     }
 
+    public virtual float GetEnterTransitionDuration(bool instant = false)
+    {
+        if (instant || enterDuration <= 0f)
+        {
+            return 0f;
+        }
+
+        return enterDuration;
+    }
+
+    public virtual float GetExitTransitionDuration(bool instant = false)
+    {
+        if (instant || exitDuration <= 0f)
+        {
+            return 0f;
+        }
+
+        return exitDuration;
+    }
+
     private void SetVisibleState()
     {
         if (canvasGroup == null)

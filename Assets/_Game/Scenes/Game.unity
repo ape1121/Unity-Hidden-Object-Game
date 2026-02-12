@@ -1645,6 +1645,16 @@ MonoBehaviour:
   targetHitLeadTime: 0.025
   homeButton: {fileID: 1002134477}
   boosterButton: {fileID: 852177383}
+  pauseButtonContainer: {fileID: 1887436052}
+  goldContainer: {fileID: 495823890}
+  itemInventory: {fileID: 1343725521}
+  panelEnterDuration: 0.28
+  panelExitDuration: 0.22
+  leftSlideDistance: 180
+  rightSlideDistance: 180
+  bottomSlideDistance: 180
+  panelEnterEase: 9
+  panelExitEase: 8
 --- !u!225 &1501294057
 CanvasGroup:
   m_ObjectHideFlags: 0
