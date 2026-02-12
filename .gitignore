@@ -75,5 +75,4 @@ crashlytics-build.properties
 .plastic/plastic.workspace
 .DS_Store
 ARCHITECTURE.cs
-TODO.md
 .vscode/
