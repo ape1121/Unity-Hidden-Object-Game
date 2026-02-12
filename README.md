@@ -2,7 +2,8 @@
 
 Search It is a Unity hidden-object vertical slice focused on clean architecture and rapid AI-assisted iteration.
 
-Targeted Resolution : 1284 x 2778
+Targeted Resolution : 1284 x 2778  
+Unity Version : 6000.3.6f1
 
 ## Goals for This Slice
 
