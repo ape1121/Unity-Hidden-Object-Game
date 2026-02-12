@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class GameUI : PausableScreenUI
+public class GameUI : SceneUserInterface
 {
     [Header("Dependencies")]
     [SerializeField] private HiddenItemSpawner hiddenItemSpawner;

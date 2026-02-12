@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MainUI : PausableScreenUI
+public class MainUI : SceneUserInterface
 {
     [SerializeField] private Button playButton;
     [SerializeField] private bool enterOnEnable = true;
