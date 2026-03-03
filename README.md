@@ -13,3 +13,7 @@ Unity Version : 6000.3.6f1
 - Coin system based on elapsed time
 - UI screen management (menus, transitions, popups)
 - AI-generated art asset integration
+
+# Screenshot
+
+![Preview](Assets/_Game/Assets/Sprites/SearchItPreview.png)
